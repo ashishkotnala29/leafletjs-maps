@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+            integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+            crossorigin=""></script>
+    <meta charset="UTF-8">
+    <title>LeafletJS-Map</title>
+    <style>
+        #mapid { width: 600px; height: 400px; position: relative; }
+    </style>
+</head>
+<body>
+<div id="mapid"></div>
+<br/>
+<input type="text" id="searchId" name="search" onkeyup="checkBlank(this.value)">
+<input type="button" id="searchBtn" value="Search" onclick="applyBorder(document.getElementById('searchId').value)" disabled>
+</body>
+<script>
+
+    var layer = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        maxZoom: 18,
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+            '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        id: 'mapbox/streets-v11',
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+    });
+
+    var mymap = L.map('mapid',{
+        layers: [layer]
+    }).setView([28.7041, 77.1025], 8);
+
+    function checkBlank(val) {
+        var searchBtn = document.getElementById('searchBtn');
+        if (searchBtn && ''==val) {
+            searchBtn.disabled = true;
+        } else {
+            searchBtn.disabled = false;
+        }
+    }
+
+    function removeMarkers() {
+        mymap.eachLayer(function(layer) {
+            if (layer.myTag &&  layer.myTag === "searched") {
+                mymap.removeLayer(layer)
+            }
+        });
+    }
+
+    function applyBorder(queryName) {
+        if(''==queryName)
+            return;
+        jQuery.ajax({
+            type: 'GET',
+            dataType: 'json',
+            cache: true,
+            url: 'https://nominatim.openstreetmap.org/search?q=' + queryName.trim() + '&polygon_geojson=1&format=json'
+        }).then(function(responseData) {
+            removeMarkers();
+            L.geoJSON(responseData[0].geojson, {
+                color: "red",
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 0.0,
+                onEachFeature: function (feature, layer) {
+                    layer.myTag = "searched"
+                }
+            }).addTo(mymap);
+        });
+    }
+</script>
+</html>
