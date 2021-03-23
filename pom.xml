@@ -9,8 +9,8 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.ashish</groupId>
-    <artifactId>leafletjs-maps</artifactId>
-    <version>0.0.0.1-SNAPSHOT</version>
+    <artifactId>maps-demo</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <name>LeafletJS-Maps</name>
     <description>Demo project for Spring Boot</description>
 
